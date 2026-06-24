@@ -1,0 +1,585 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: Last-Minute Life Saver API
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: tasks
+    description: Task management
+  - name: goals
+    description: Goal and habit tracking
+  - name: ai
+    description: AI-powered assistance
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+
+  /tasks:
+    get:
+      operationId: listTasks
+      tags: [tasks]
+      summary: List all tasks
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+        - name: priority
+          in: query
+          schema:
+            type: string
+      responses:
+        "200":
+          description: List of tasks
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+    post:
+      operationId: createTask
+      tags: [tasks]
+      summary: Create a new task
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskInput"
+      responses:
+        "201":
+          description: Created task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+
+  /tasks/{id}:
+    get:
+      operationId: getTask
+      tags: [tasks]
+      summary: Get a task by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "200":
+          description: Task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    patch:
+      operationId: updateTask
+      tags: [tasks]
+      summary: Update a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/TaskUpdate"
+      responses:
+        "200":
+          description: Updated task
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Task"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteTask
+      tags: [tasks]
+      summary: Delete a task
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /tasks/dashboard:
+    get:
+      operationId: getTaskDashboard
+      tags: [tasks]
+      summary: Get dashboard summary of tasks
+      responses:
+        "200":
+          description: Dashboard stats
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TaskDashboard"
+
+  /tasks/urgent:
+    get:
+      operationId: getUrgentTasks
+      tags: [tasks]
+      summary: Get urgent/overdue tasks
+      responses:
+        "200":
+          description: Urgent tasks list
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Task"
+
+  /goals:
+    get:
+      operationId: listGoals
+      tags: [goals]
+      summary: List all goals
+      responses:
+        "200":
+          description: List of goals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Goal"
+    post:
+      operationId: createGoal
+      tags: [goals]
+      summary: Create a new goal
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoalInput"
+      responses:
+        "201":
+          description: Created goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+
+  /goals/{id}:
+    patch:
+      operationId: updateGoal
+      tags: [goals]
+      summary: Update a goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GoalUpdate"
+      responses:
+        "200":
+          description: Updated goal
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Goal"
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+    delete:
+      operationId: deleteGoal
+      tags: [goals]
+      summary: Delete a goal
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        "204":
+          description: Deleted
+        "404":
+          description: Not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /ai/prioritize:
+    post:
+      operationId: aiPrioritizeTasks
+      tags: [ai]
+      summary: AI-powered task prioritization and scheduling suggestions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiPrioritizeInput"
+      responses:
+        "200":
+          description: AI prioritization result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiPrioritizeResult"
+
+  /ai/breakdown:
+    post:
+      operationId: aiBreakdownTask
+      tags: [ai]
+      summary: AI-powered task breakdown into subtasks
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiBreakdownInput"
+      responses:
+        "200":
+          description: AI breakdown result
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiBreakdownResult"
+
+  /ai/coach:
+    post:
+      operationId: aiCoach
+      tags: [ai]
+      summary: AI productivity coach — streaming chat (SSE)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiCoachInput"
+      responses:
+        "200":
+          description: SSE stream of coaching response
+          content:
+            text/event-stream: {}
+
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+
+    Task:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        status:
+          type: string
+          enum: [todo, in_progress, done]
+        dueDate:
+          type: ["string", "null"]
+        category:
+          type: ["string", "null"]
+        estimatedMinutes:
+          type: ["integer", "null"]
+        aiScore:
+          type: ["integer", "null"]
+        goalId:
+          type: ["integer", "null"]
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - priority
+        - status
+        - createdAt
+        - updatedAt
+
+    TaskInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        status:
+          type: string
+          enum: [todo, in_progress, done]
+        dueDate:
+          type: string
+        category:
+          type: string
+        estimatedMinutes:
+          type: integer
+        goalId:
+          type: integer
+      required:
+        - title
+        - priority
+
+    TaskUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        priority:
+          type: string
+          enum: [low, medium, high, urgent]
+        status:
+          type: string
+          enum: [todo, in_progress, done]
+        dueDate:
+          type: string
+        category:
+          type: string
+        estimatedMinutes:
+          type: integer
+        aiScore:
+          type: integer
+        goalId:
+          type: integer
+
+    TaskDashboard:
+      type: object
+      properties:
+        total:
+          type: integer
+        todo:
+          type: integer
+        inProgress:
+          type: integer
+        done:
+          type: integer
+        urgent:
+          type: integer
+        overdue:
+          type: integer
+        dueToday:
+          type: integer
+        completionRate:
+          type: number
+      required:
+        - total
+        - todo
+        - inProgress
+        - done
+        - urgent
+        - overdue
+        - dueToday
+        - completionRate
+
+    Goal:
+      type: object
+      properties:
+        id:
+          type: integer
+        title:
+          type: string
+        description:
+          type: ["string", "null"]
+        targetDate:
+          type: ["string", "null"]
+        progress:
+          type: integer
+        color:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+      required:
+        - id
+        - title
+        - progress
+        - color
+        - createdAt
+
+    GoalInput:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        targetDate:
+          type: string
+        color:
+          type: string
+      required:
+        - title
+        - color
+
+    GoalUpdate:
+      type: object
+      properties:
+        title:
+          type: string
+        description:
+          type: string
+        targetDate:
+          type: string
+        progress:
+          type: integer
+        color:
+          type: string
+
+    AiPrioritizeInput:
+      type: object
+      properties:
+        taskIds:
+          type: array
+          items:
+            type: integer
+        context:
+          type: string
+      required:
+        - taskIds
+
+    AiPrioritizeResult:
+      type: object
+      properties:
+        prioritizedTasks:
+          type: array
+          items:
+            $ref: "#/components/schemas/AiTaskRanking"
+        scheduleSuggestion:
+          type: string
+        tips:
+          type: array
+          items:
+            type: string
+      required:
+        - prioritizedTasks
+        - scheduleSuggestion
+        - tips
+
+    AiTaskRanking:
+      type: object
+      properties:
+        taskId:
+          type: integer
+        score:
+          type: integer
+        reason:
+          type: string
+        suggestedTime:
+          type: string
+      required:
+        - taskId
+        - score
+        - reason
+        - suggestedTime
+
+    AiBreakdownInput:
+      type: object
+      properties:
+        taskId:
+          type: integer
+        taskTitle:
+          type: string
+        taskDescription:
+          type: string
+      required:
+        - taskTitle
+
+    AiBreakdownResult:
+      type: object
+      properties:
+        subtasks:
+          type: array
+          items:
+            type: string
+        estimatedTotalMinutes:
+          type: integer
+        tips:
+          type: array
+          items:
+            type: string
+      required:
+        - subtasks
+        - estimatedTotalMinutes
+        - tips
+
+    AiCoachInput:
+      type: object
+      properties:
+        message:
+          type: string
+        context:
+          type: string
+      required:
+        - message
